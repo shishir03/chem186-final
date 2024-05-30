@@ -23,5 +23,5 @@ int main() {
 
     s->molecules.push_back(mol);
 
-    s->run(100);
+    s->run(50);
 }

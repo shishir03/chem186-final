@@ -10,18 +10,18 @@ std::tuple<double, double, double> System::force(atom* a) {
             double l = b->get_length();
             double dl = l - eq;
 
-            double dx = dl*l / (b->a1->x - b->a2->x);
-            double dy = dl*l / (b->a1->y - b->a2->y);
-            double dz = dl*l / (b->a1->z - b->a2->z);
+            double dx = dl*(b->a1->x - b->a2->x) / l;
+            double dy = dl*(b->a1->y - b->a2->y) / l;
+            double dz = dl*(b->a1->z - b->a2->z) / l;
 
             return std::make_tuple(-k*dx, -k*dy, -k*dz);
         } else if(b->a2 == a) {
             double l = b->get_length();
             double dl = l - eq;
 
-            double dx = dl*l / (b->a2->x - b->a1->x);
-            double dy = dl*l / (b->a2->y - b->a1->y);
-            double dz = dl*l / (b->a2->z - b->a1->z);
+            double dx = dl*(b->a2->x - b->a1->x) / l;
+            double dy = dl*(b->a2->y - b->a1->y) / l;
+            double dz = dl*(b->a2->z - b->a1->z) / l;
 
             return std::make_tuple(-k*dx, -k*dy, -k*dz);
         }
@@ -42,6 +42,8 @@ void System::do_timestep() {
             double ax = std::get<0>(Fi) / a->mass;
             double ay = std::get<1>(Fi) / a->mass;
             double az = std::get<2>(Fi) / a->mass;
+
+            printf("Acceleration: %.2f %.2f %.2f\n", ax, ay, az);
 
             // Update positions
             a->x += a->vx*dt + 0.5*ax*dt*dt;
@@ -66,6 +68,7 @@ void System::do_timestep() {
 
 void System::run(int num_timesteps) {
     for(int i = 0; i < num_timesteps; i++) {
+        printf("Timestep %d\n", i);
         for(int j = 0; j < molecules.size(); j++) {
             printf("Molecule %d\n", j);
             for(auto atom : molecules[j]->atoms) {
