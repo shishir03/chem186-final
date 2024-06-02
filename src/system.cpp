@@ -3,42 +3,50 @@
 #include <math.h>
 #include <stdio.h>
 
-std::tuple<double, double, double> System::force(atom* a) {
-    std::vector<bond*> bonds = ((molecule*) a->mol)->bonds;
-    for(auto b : bonds) {
-        if(b->a1 == a) {
+// This can probably be parallelized
+std::tuple<double, double, double> System::force(double init_pot_energy, atom* a) {
+    a->x += dr;
+    double new_pot_energy = potential_energy();
+    double fx = -(new_pot_energy - init_pot_energy) / dr;
+    a->x -= dr;
+    // printf("%.2f %.2f\n", init_pot_energy, new_pot_energy);
+
+    a->y += dr;
+    new_pot_energy = potential_energy();
+    double fy = -(new_pot_energy - init_pot_energy) / dr;
+    a->y -= dr;
+    // printf("%.2f %.2f\n", init_pot_energy, new_pot_energy);
+
+    a->z += dr;
+    new_pot_energy = potential_energy();
+    double fz = -(new_pot_energy - init_pot_energy) / dr;
+    a->z -= dr;
+    // printf("%.2f %.2f\n", init_pot_energy, new_pot_energy);
+
+    return std::make_tuple(fx, fy, fz);
+}
+
+double System::potential_energy() {
+    double total_potential = 0;
+
+    for(auto mol : molecules) {
+        for(auto b : mol->bonds) {
             double l = b->get_length();
             double dl = l - eq;
-
-            double dx = dl*(b->a1->x - b->a2->x) / l;
-            double dy = dl*(b->a1->y - b->a2->y) / l;
-            double dz = dl*(b->a1->z - b->a2->z) / l;
-
-            return std::make_tuple(-k*dx, -k*dy, -k*dz);
-        } else if(b->a2 == a) {
-            double l = b->get_length();
-            double dl = l - eq;
-
-            double dx = dl*(b->a2->x - b->a1->x) / l;
-            double dy = dl*(b->a2->y - b->a1->y) / l;
-            double dz = dl*(b->a2->z - b->a1->z) / l;
-
-            return std::make_tuple(-k*dx, -k*dy, -k*dz);
+            total_potential += 0.5*k*dl*dl;
         }
     }
 
-    return std::make_tuple(0, 0, 0);
-}
-
-double System::potential_energy(atom* a) {
-    return 0;
+    return total_potential;
 }
 
 void System::do_timestep() {
     for(auto mol : molecules) {
         for(auto a : mol->atoms) {
+            double u = potential_energy();
+
             // Compute forces
-            std::tuple<double, double, double> Fi = force(a);
+            std::tuple<double, double, double> Fi = force(u, a);
             double ax = std::get<0>(Fi) / a->mass;
             double ay = std::get<1>(Fi) / a->mass;
             double az = std::get<2>(Fi) / a->mass;
@@ -50,8 +58,10 @@ void System::do_timestep() {
             a->y += a->vy*dt + 0.5*ay*dt*dt;
             a->z += a->vz*dt + 0.5*az*dt*dt;
 
+            u = potential_energy();
+
             // Compute new forces
-            std::tuple<double, double, double> Fi1 = force(a);
+            std::tuple<double, double, double> Fi1 = force(u, a);
             double ax1 = std::get<0>(Fi1) / a->mass;
             double ay1 = std::get<1>(Fi1) / a->mass;
             double az1 = std::get<2>(Fi1) / a->mass; 
