@@ -1,14 +1,15 @@
 #include "system.h"
-#include "consts.h"
 #include <math.h>
 #include <stdio.h>
 #include <fstream>
 #include <sstream>
 
 // Initialize Lennard Jones potentials array
-System::System() {
-    std::ifstream file("lennard_jones.txt");
+System::System(double size, double temper) {
+    box_size = size;
+    this->temper = temper;
 
+    std::ifstream file("lennard_jones.txt");
     std::string line;
 
     // Read the file line by line
@@ -61,7 +62,7 @@ double System::potential_energy() {
             // Bond stretch term
             double l = b->get_length();
             double dl = l - equil;
-            total_potential += 0.5*k*dl*dl;
+            total_potential += 0.5*keq*dl*dl;
         }
 
         for(auto a : mol->atoms) {
@@ -105,6 +106,31 @@ void System::do_timestep() {
             a->y += a->vy*dt + 0.5*ay*dt*dt;
             a->z += a->vz*dt + 0.5*az*dt*dt;
 
+            // Assume elastic collisions with box wall
+            if(a->x < -box_size / 2) {
+                a->x = -box_size / 2;
+                a->vx *= -1;
+            } else if(a->x > box_size / 2) {
+                a->x = box_size / 2;
+                a->vx *= -1;
+            }
+
+            if(a->y < -box_size / 2) {
+                a->y = -box_size / 2;
+                a->vy *= -1;
+            } else if(a->y > box_size / 2) {
+                a->y = box_size / 2;
+                a->vy *= -1;
+            }
+
+            if(a->z < -box_size / 2) {
+                a->z = -box_size / 2;
+                a->vz *= -1;
+            } else if(a->z > box_size / 2) {
+                a->z = box_size / 2;
+                a->vz *= -1;
+            }
+
             u = potential_energy();
 
             // Compute new forces
@@ -129,7 +155,7 @@ void System::run(int num_timesteps) {
         for(int j = 0; j < molecules.size(); j++) {
             printf("Molecule %d ", j);
             for(auto atom : molecules[j]->atoms) {
-                printf("(%.5f, %.5f, %.5f)\n", atom->x, atom->y, atom->z);
+                printf("(%.5f, %.5f, %.5f) velocity: (%.5f, %.5f, %.5f)\n", atom->x, atom->y, atom->z, atom->vx, atom->vy, atom->vz);
             }
         }
 

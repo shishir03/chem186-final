@@ -1,14 +1,14 @@
 #include "molecule.h"
 #include <math.h>
 
-atom::atom(double x, double y, double z, double charge, int mass) {
+atom::atom(double x, double y, double z, double vx, double vy, double vz, double charge, int mass) {
     this->x = x;
     this->y = y;
     this->z = z;
-    
-    vx = 0;
-    vy = 0;
-    vz = 0;
+
+    this->vx = vx;
+    this->vy = vy;
+    this->vz = vz;
 
     this->charge = charge;
     this->mass = mass;

@@ -12,7 +12,7 @@ class atom {
         double vy;
         double vz;
 
-        atom(double x, double y, double z, double charge, int mass);
+        atom(double x, double y, double z, double vx, double vy, double vz, double charge, int mass);
         double get_distance(atom* a2);
 };
 
