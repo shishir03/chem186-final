@@ -6,22 +6,23 @@
  *  - figure out how to display molecules (if there's time)
 */
 #include "system.h"
+#include <random>
 
 int main() {
+    srand(time(NULL));
     System* s = new System();
-    atom a1 = { 0, 0, 0, 0, 2, 0, 0, 0, nullptr };
-    atom a2 = { 5, 0, 0, 0, 2, 0, 0, 0, nullptr };
-    bond* b = new bond(&a1, &a2);
 
-    molecule* mol = new molecule();
-    mol->bonds.push_back(b);
-    mol->atoms.push_back(&a1);
-    mol->atoms.push_back(&a2);
+    for(int i = 0; i < 25; i++) {
+        // Initialize a new He atom at random coordinates
+        double x = (rand() % 200) / 100.0;
+        double y = (rand() % 200) / 100.0;
+        double z = (rand() % 200) / 100.0;
 
-    a1.mol = mol;
-    a2.mol = mol;
+        atom* a = new atom(x, y, z, 0, 2);
+        molecule* mol = new molecule();
+        mol->atoms.push_back(a);
+        s->molecules.push_back(mol);
+    }
 
-    s->molecules.push_back(mol);
-
-    s->run(50);
+    s->run(10);
 }

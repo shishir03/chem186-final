@@ -2,6 +2,35 @@
 #include "consts.h"
 #include <math.h>
 #include <stdio.h>
+#include <fstream>
+#include <sstream>
+
+// Initialize Lennard Jones potentials array
+System::System() {
+    std::ifstream file("lennard_jones.txt");
+
+    std::string line;
+
+    // Read the file line by line
+    while (std::getline(file, line)) {
+        std::vector<std::string> row;
+        std::stringstream ss(line);
+        std::string value;
+
+        // Parse each line by commas
+        while (std::getline(ss, value, ',')) {
+            row.push_back(value);
+        }
+
+        std::pair<double, double> vals = std::make_pair(std::stod(row[3]), std::stod(row[4]));
+
+        // Add the row to the data
+        lennard_jones_pots.push_back(vals);
+    }
+
+    // Close the file
+    file.close();
+}
 
 // This can probably be parallelized
 std::tuple<double, double, double> System::force(double init_pot_energy, atom* a) {
@@ -9,19 +38,16 @@ std::tuple<double, double, double> System::force(double init_pot_energy, atom* a
     double new_pot_energy = potential_energy();
     double fx = -(new_pot_energy - init_pot_energy) / dr;
     a->x -= dr;
-    // printf("%.2f %.2f\n", init_pot_energy, new_pot_energy);
 
     a->y += dr;
     new_pot_energy = potential_energy();
     double fy = -(new_pot_energy - init_pot_energy) / dr;
     a->y -= dr;
-    // printf("%.2f %.2f\n", init_pot_energy, new_pot_energy);
 
     a->z += dr;
     new_pot_energy = potential_energy();
     double fz = -(new_pot_energy - init_pot_energy) / dr;
     a->z -= dr;
-    // printf("%.2f %.2f\n", init_pot_energy, new_pot_energy);
 
     return std::make_tuple(fx, fy, fz);
 }
@@ -31,9 +57,27 @@ double System::potential_energy() {
 
     for(auto mol : molecules) {
         for(auto b : mol->bonds) {
+            // Bond stretch term
             double l = b->get_length();
-            double dl = l - eq;
+            double dl = l - equil;
             total_potential += 0.5*k*dl*dl;
+        }
+
+        for(auto a : mol->atoms) {
+            for(auto mol2 : molecules) {
+                for(auto a2 : mol2->atoms) {
+                    if(a != a2) {
+                        double r = a->get_distance(a2);
+                        // Lennard Jones potential
+                        std::pair<double, double> pot1 = lennard_jones_pots[a->mass - 1];
+                        std::pair<double, double> pot2 = lennard_jones_pots[a2->mass - 1];
+                        double total_epsilon = sqrt(std::get<0>(pot1)*std::get<0>(pot2));
+                        double total_sigma = (std::get<1>(pot1) + std::get<1>(pot2)) / 2;
+
+                        total_potential += 4*total_epsilon*(pow(total_sigma / r, 12) - pow(total_sigma / r, 6));
+                    }
+                }
+            }
         }
     }
 
@@ -51,7 +95,7 @@ void System::do_timestep() {
             double ay = std::get<1>(Fi) / a->mass;
             double az = std::get<2>(Fi) / a->mass;
 
-            printf("Acceleration: %.2f %.2f %.2f\n", ax, ay, az);
+            // printf("Acceleration: %.2f %.2f %.2f\n", ax, ay, az);
 
             // Update positions
             a->x += a->vx*dt + 0.5*ax*dt*dt;
@@ -80,9 +124,9 @@ void System::run(int num_timesteps) {
     for(int i = 0; i < num_timesteps; i++) {
         printf("Timestep %d\n", i);
         for(int j = 0; j < molecules.size(); j++) {
-            printf("Molecule %d\n", j);
+            printf("Molecule %d ", j);
             for(auto atom : molecules[j]->atoms) {
-                printf("Atom at %.2f %.2f %.2f\n", atom->x, atom->y, atom->z);
+                printf("(%.5f, %.5f, %.5f)\n", atom->x, atom->y, atom->z);
             }
         }
 

@@ -1,17 +1,19 @@
 #include <vector>
 
-struct atom {
-    double x;
-    double y;
-    double z;
-    double charge;
-    int mass;
+class atom {
+    public:
+        double x;
+        double y;
+        double z;
+        double charge;
+        int mass;
 
-    double vx;
-    double vy;
-    double vz;
+        double vx;
+        double vy;
+        double vz;
 
-    void* mol;
+        atom(double x, double y, double z, double charge, int mass);
+        double get_distance(atom* a2);
 };
 
 class bond {
