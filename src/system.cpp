@@ -32,7 +32,7 @@ System::System() {
     file.close();
 }
 
-// This can probably be parallelized
+// Units of eV A^-1
 std::tuple<double, double, double> System::force(double init_pot_energy, atom* a) {
     a->x += dr;
     double new_pot_energy = potential_energy();
@@ -52,6 +52,7 @@ std::tuple<double, double, double> System::force(double init_pot_energy, atom* a
     return std::make_tuple(fx, fy, fz);
 }
 
+// Units of eV
 double System::potential_energy() {
     double total_potential = 0;
 
@@ -71,6 +72,7 @@ double System::potential_energy() {
                         // Lennard Jones potential
                         std::pair<double, double> pot1 = lennard_jones_pots[a->mass - 1];
                         std::pair<double, double> pot2 = lennard_jones_pots[a2->mass - 1];
+                        // units of eV
                         double total_epsilon = sqrt(std::get<0>(pot1)*std::get<0>(pot2));
                         double total_sigma = (std::get<1>(pot1) + std::get<1>(pot2)) / 2;
 
@@ -91,9 +93,10 @@ void System::do_timestep() {
 
             // Compute forces
             std::tuple<double, double, double> Fi = force(u, a);
-            double ax = std::get<0>(Fi) / a->mass;
-            double ay = std::get<1>(Fi) / a->mass;
-            double az = std::get<2>(Fi) / a->mass;
+            // Acceleration: units of eV A^-1 amu^-1 => 9648.53322 A ps^-2
+            double ax = accel_constant * std::get<0>(Fi) / a->mass;
+            double ay = accel_constant * std::get<1>(Fi) / a->mass;
+            double az = accel_constant * std::get<2>(Fi) / a->mass;
 
             // printf("Acceleration: %.2f %.2f %.2f\n", ax, ay, az);
 

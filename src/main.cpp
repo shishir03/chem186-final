@@ -1,9 +1,11 @@
 /**
  * Plan:
- *  - get basic velocity verlet method working
- *  - figure out how to get AMBER forcefield working (either via a library or doing it manually)
+ *  - implement electrostatic forces
+ *  - find library for bond stretch / equilibrium constants
+ * If there's time:
+ *  - figure out how to do bond torsion angles / dihedral angles
  *  - add support for parsing mol2 files to get molecule data
- *  - figure out how to display molecules (if there's time)
+ *  - figure out how to display molecules
 */
 #include "system.h"
 #include <random>
