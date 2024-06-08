@@ -1,8 +1,9 @@
 /**
  * Plan:
  *  - implement electrostatic forces
- *  - find library for bond stretch / equilibrium constants
+ *  - simple thermostat
  * If there's time:
+ *  - find library for bond stretch / equilibrium constants
  *  - figure out how to do bond torsion angles / dihedral angles
  *  - add support for parsing mol2 files to get molecule data
  *  - figure out how to display molecules

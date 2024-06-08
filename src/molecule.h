@@ -14,6 +14,7 @@ class atom {
 
         atom(double x, double y, double z, double vx, double vy, double vz, double charge, int mass);
         double get_distance(atom* a2);
+        double get_speed();
 };
 
 class bond {

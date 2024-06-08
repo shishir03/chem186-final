@@ -18,6 +18,10 @@ double atom::get_distance(atom* a2) {
     return sqrt((x - a2->x)*(x - a2->x) + (y - a2->y)*(y - a2->y) + (z - a2->z)*(z - a2->z));
 }
 
+double atom::get_speed() {
+    return sqrt(vx*vx + vy*vy + vz*vz);
+}
+
 double bond::get_length() {
     return a1->get_distance(a2);
 }

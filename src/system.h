@@ -15,6 +15,7 @@ class System {
         void run(int num_steps);
 
     private:
+        double kinetic_energy();
         double potential_energy();
         std::tuple<double, double, double> force(double init_pot_energy, atom* a);
         void do_timestep();

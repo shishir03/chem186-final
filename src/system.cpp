@@ -87,6 +87,20 @@ double System::potential_energy() {
     return total_potential;
 }
 
+// Units of eV
+double System::kinetic_energy() {
+    double total_kinetic = 0;
+    
+    for(auto mol : molecules) {
+        for(auto a : mol->atoms) {
+            double v = a->get_speed();
+            total_kinetic += (0.5*a->mass*v*v)*to_eV;
+        }
+    }
+
+    return total_kinetic;
+}
+
 void System::do_timestep() {
     for(auto mol : molecules) {
         for(auto a : mol->atoms) {
@@ -152,6 +166,13 @@ void System::do_timestep() {
 void System::run(int num_timesteps) {
     for(int i = 0; i < num_timesteps; i++) {
         printf("Timestep %d\n", i);
+        double U = potential_energy();
+        double K = kinetic_energy();
+        double E = U + K;
+        printf("Potential energy: %.5f eV\n", U);
+        printf("Kinetic energy: %.5f eV\n", K);
+        printf("Total energy: %.5f eV\n", E);
+
         for(int j = 0; j < molecules.size(); j++) {
             printf("Molecule %d ", j);
             for(auto atom : molecules[j]->atoms) {
