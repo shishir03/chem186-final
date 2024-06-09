@@ -6,3 +6,5 @@ CMakeCache.txt
 CMakeFiles
 main
 lennard_jones.txt
+Makefile
+out.txt
