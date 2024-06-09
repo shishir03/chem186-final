@@ -1,7 +1,7 @@
 #include "molecule.h"
 #include <math.h>
 
-atom::atom(double x, double y, double z, double vx, double vy, double vz, double charge, int mass) {
+atom::atom(double x, double y, double z, double vx, double vy, double vz, double charge, int atomic_no, int mass) {
     this->x = x;
     this->y = y;
     this->z = z;
@@ -11,6 +11,7 @@ atom::atom(double x, double y, double z, double vx, double vy, double vz, double
     this->vz = vz;
 
     this->charge = charge;
+    this->atomic_no = atomic_no;
     this->mass = mass;
 }
 

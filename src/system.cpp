@@ -70,9 +70,10 @@ double System::potential_energy() {
                 for(auto a2 : mol2->atoms) {
                     if(a != a2) {
                         double r = a->get_distance(a2);
+                        if(r < 1e-8) r = 1e-8;
                         // Lennard Jones potential
-                        std::pair<double, double> pot1 = lennard_jones_pots[a->mass - 1];
-                        std::pair<double, double> pot2 = lennard_jones_pots[a2->mass - 1];
+                        std::pair<double, double> pot1 = lennard_jones_pots[a->atomic_no - 1];
+                        std::pair<double, double> pot2 = lennard_jones_pots[a2->atomic_no - 1];
                         // units of eV
                         double total_epsilon = sqrt(std::get<0>(pot1)*std::get<0>(pot2));
                         double total_sigma = (std::get<1>(pot1) + std::get<1>(pot2)) / 2;
