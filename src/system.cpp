@@ -164,15 +164,27 @@ void System::do_timestep() {
     time += dt;
 }
 
+double System::temperature() {
+    int N = 0;
+    for(auto mol : molecules) {
+        for(auto atom : mol->atoms) {
+            N++;
+        }
+    }
+
+    return 2*eV_to_kcalmol*kinetic_energy() / (3*N*R_const);
+}
+
 void System::run(int num_timesteps) {
     for(int i = 0; i < num_timesteps; i++) {
         printf("Timestep %d\n", i);
-        double U = potential_energy();
+        /* double U = potential_energy();
         double K = kinetic_energy();
         double E = U + K;
         printf("Potential energy: %.5f eV\n", U);
         printf("Kinetic energy: %.5f eV\n", K);
-        printf("Total energy: %.5f eV\n", E);
+        printf("Total energy: %.5f eV\n", E); */
+        printf("Temper %.5f K\n", temperature());
 
         for(int j = 0; j < molecules.size(); j++) {
             printf("Molecule %d ", j);

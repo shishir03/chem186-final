@@ -15,8 +15,11 @@ class System {
         void run(int num_steps);
 
     private:
+        int size();
         double kinetic_energy();
         double potential_energy();
+        double temperature();
+        void sample_boltzmann(double* vx, double* vy, double* vz);
         std::tuple<double, double, double> force(double init_pot_energy, atom* a);
         void do_timestep();
 };
