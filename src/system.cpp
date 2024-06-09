@@ -6,6 +6,8 @@
 
 // Initialize Lennard Jones potentials array
 System::System(double size, double temper) {
+    srand(time(NULL));
+
     box_size = size;
     this->temper = temper;
 
@@ -161,7 +163,18 @@ void System::do_timestep() {
         }
     }
 
-    time += dt;
+    run_thermostat();
+
+    t += dt;
+}
+
+// Andersen thermostat
+void System::run_thermostat() {
+    int random_mol = rand() % molecules.size();
+    molecule* mol = molecules[random_mol];
+    int random_atom = rand() % mol->atoms.size();
+    atom* a = mol->atoms[random_atom];
+    sample_boltzmann(a);
 }
 
 double System::temperature() {
@@ -173,6 +186,21 @@ double System::temperature() {
     }
 
     return 2*eV_to_kcalmol*kinetic_energy() / (3*N*R_const);
+}
+
+// Set the specified atom's velocity
+void System::sample_boltzmann(atom* a) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    std::normal_distribution<double> gaussian(0, 1);
+    double vx = sqrt(kB*temper / a->mass)*gaussian(gen);
+    double vy = sqrt(kB*temper / a->mass)*gaussian(gen);
+    double vz = sqrt(kB*temper / a->mass)*gaussian(gen);
+
+    a->vx = vx;
+    a->vy = vy;
+    a->vz = vz;
 }
 
 void System::run(int num_timesteps) {
